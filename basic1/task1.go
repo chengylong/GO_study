@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/big"
 )
 
 // var nums = []int{2, 2, 1}
@@ -111,14 +112,45 @@ func dealPrefix(str1 string, str2 string) string {
 	return str1[:index]
 }
 
+/*
+加一，思路是依次取出数组中的数字作为一个十进制数。对十进制数进行+1操作后，把十进制数转换回数组
+*/
+func plusOne(digits []int) []int {
+	fmt.Println(digits)
+
+	//数组按照顺序转换为int类型整数
+	num := new(big.Int)
+	for _, v := range digits {
+		num = num.Mul(num, big.NewInt(10)).Add(num, big.NewInt(int64(v)))
+	}
+	//加1
+	num.Add(num, big.NewInt(1))
+	fmt.Println(num)
+
+	//转换回数组，对10取余，拼接后反转
+	result := []int{}
+	for num.Cmp(big.NewInt(0)) > 0 {
+		mod := new(big.Int)
+		num.DivMod(num, big.NewInt(10), mod) // tmp = tmp / 10, mod = 余数
+		result = append(result, int(mod.Int64()))
+	}
+	//反转数组
+	for i, j := 0, len(result)-1; i < j; i, j = i+1, j-1 {
+		result[i], result[j] = result[j], result[i]
+	}
+	fmt.Println(result)
+	return result
+}
+
 func main() {
 	// str := "{(())}[()]"
 	// bol := validParentheses(str)
 	// fmt.Println(bol) "cir","car"
 	// strs := []string{"aaa", "aa", "aaa"}
 
-	strs := []string{"flower", "flow", "fliwht"}
-	preStr := publicPrefix(strs)
-	fmt.Println(preStr)
+	// strs := []string{"flower", "flow", "fliwht"}
+	ints := []int{7, 2, 8, 5, 0, 9, 1, 2, 9, 5, 3, 6, 6, 7, 3, 2, 8, 4, 3, 7, 9, 5, 7, 7, 4, 7, 4, 9, 4, 7, 0, 1, 1, 1, 7, 4, 0, 0, 6}
+	ints = plusOne(ints)
+	// fmt.Println(ints)
 
 }

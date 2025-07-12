@@ -3,12 +3,13 @@ package main
 import (
 	"fmt"
 	"math/big"
+	"sort"
 )
 
 // var nums = []int{2, 2, 1}
 var nums = []int{4, 1, 2, 1, 2}
 
-// 找到切片中只出现一次的数字
+// 1.找到切片中只出现一次的数字
 func singleNumber(nums []int) int {
 	countMap := make(map[int]int)
 	for _, num := range nums {
@@ -23,7 +24,7 @@ func singleNumber(nums []int) int {
 	return 0
 }
 
-// 回文数
+// 2.回文数
 func isPalindrome(x int) bool {
 	//负数和以0结尾的正数必然不是回文数
 	if x < 0 || (x != 0 && x%10 == 0) {
@@ -41,7 +42,7 @@ func isPalindrome(x int) bool {
 	return reversed == original || reversed/10 == original
 }
 
-// 有效的括号
+// 3.有效的括号
 func validParentheses(s string) bool {
 	// str = "()[]{}"
 	//字符串必须是长度大于0且长度为偶数
@@ -71,7 +72,7 @@ func validParentheses(s string) bool {
 	return len(stack) == 0
 }
 
-// 最长公共前缀
+// 4.最长公共前缀
 // 其实就是去一个字符串数组中，所有元素前缀相同的前缀·
 func publicPrefix(strs []string) string {
 	// strs = []string{"flower", "flow", "flight"}
@@ -113,7 +114,7 @@ func dealPrefix(str1 string, str2 string) string {
 }
 
 /*
-加一，思路是依次取出数组中的数字作为一个十进制数。对十进制数进行+1操作后，把十进制数转换回数组
+5.加一，思路是依次取出数组中的数字作为一个十进制数。对十进制数进行+1操作后，把十进制数转换回数组
 */
 func plusOne(digits []int) []int {
 	fmt.Println(digits)
@@ -142,6 +143,69 @@ func plusOne(digits []int) []int {
 	return result
 }
 
+// 6.删除有序数组中的重复项
+func deleteDuplicates(nums []int) int {
+	if len(nums) == 0 {
+		return 0
+	}
+	//记录一共还剩几位数
+	k := 1
+	for i := 1; i < len(nums); i++ {
+		if nums[i] != nums[i-1] {
+			nums[k] = nums[i]
+			k++
+		}
+	}
+	fmt.Println(nums)
+	return k
+}
+
+// 两数之和
+// func twoSum(nums []int, target int) []int {
+// 	//相加操作，在和target 判断是否相等，
+
+// }
+
+//合并区间
+// 输入：intervals = [[1,4],[4,5]]
+// 输出：[[1,5]]
+// 解释：区间 [1,4] 和 [4,5] 可被视为重叠区间。
+
+// 输入：intervals = [[1,6],[2,4]]
+// 输出：[[1,6]]
+// 解释：区间 [1,6] 和 [2,4] 可被视为重叠区间。
+
+func merge(intervals [][]int) [][]int {
+	if len(intervals) == 0 {
+		return [][]int{}
+	}
+	//多条件排序（先按第一个元素，再按第二个元素）
+	sort.Slice(intervals, func(i, j int) bool {
+		return intervals[i][0] < intervals[j][0]
+	})
+	fmt.Println("排序后:", intervals)
+	// 双探针遍历，比较合并后集合中的右节点和要合并的集合中的左节点的大小，做处理
+	// 如果右<左，直接加入新的元素，如果右>左，需要合并数组，在判断右元素和新数组右
+	// 元素的大小，合并后的数组右元素的值取他们中较大值
+	mergInts := [][]int{}
+	for i, _ := range intervals {
+		//要加入的区间数组的左右元素
+		left_e := intervals[i][0]
+		rig_e := intervals[i][1]
+		merg_len := len(mergInts)
+		if i == 0 || (mergInts[merg_len-1])[1] < left_e {
+			mergInts = append(mergInts, intervals[i])
+		} else {
+			//合并区间，确定右边界的具体值
+			total_rig := max(mergInts[merg_len-1][1], rig_e)
+			mergInts[merg_len-1][1] = total_rig
+			fmt.Println("右边界值：", total_rig)
+			fmt.Println("mergInts：", mergInts)
+		}
+	}
+	return mergInts
+}
+
 func main() {
 	// str := "{(())}[()]"
 	// bol := validParentheses(str)
@@ -149,8 +213,11 @@ func main() {
 	// strs := []string{"aaa", "aa", "aaa"}
 
 	// strs := []string{"flower", "flow", "fliwht"}
-	ints := []int{7, 2, 8, 5, 0, 9, 1, 2, 9, 5, 3, 6, 6, 7, 3, 2, 8, 4, 3, 7, 9, 5, 7, 7, 4, 7, 4, 9, 4, 7, 0, 1, 1, 1, 7, 4, 0, 0, 6}
-	ints = plusOne(ints)
-	// fmt.Println(ints)
+	// ints := []int{7, 2, 8, 5, 0, 9, 1, 2, 9, 5, 3, 6, 6, 7, 3, 2, 8, 4, 3, 7, 9, 5, 7, 7, 4, 7, 4, 9, 4, 7, 0, 1, 1, 1, 7, 4, 0, 0, 6}
+	// ints := []int{0, 0, 1, 1, 1, 2, 2, 3, 3, 4}
+	// int := deleteDuplicates(ints)
+	ints := [][]int{{1, 6}, {2, 4}, {3, 9}, {9, 12}}
+	re_ints := merge(ints)
+	fmt.Println(re_ints)
 
 }

@@ -160,13 +160,33 @@ func deleteDuplicates(nums []int) int {
 	return k
 }
 
-// 两数之和
-// func twoSum(nums []int, target int) []int {
-// 	//相加操作，在和target 判断是否相等，
+// 7,两数之和
+// 输入：nums = [2,7,11,15], target = 9
+// 输出：[0,1]
+// 解释：因为 nums[0] + nums[1] == 9 ，返回 [0, 1] 。
+// 两层循环显然可以解决问题，但是时间复杂度高，可以使用hash映射思路，
+// 由于 target = 两个元素之和，
+// 1，遍历 nums中元素，将其中的值小于 target 值的元素 根据 k=（target-元素值） v=元素下标值 初始化 map
+// 2，重新遍历 nums元素，依次对nums中元素与map做key存在判断，如果存在说明当前元素找到映射元素，映射关系为这两个元素相加 = target
+func twoSum(nums []int, target int) []int {
+	//初始化map
+	map1 := make(map[int]int)
+	for index, v := range nums {
+		map1[target-v] = index
+	}
+	res_nums := []int{}
+	//映射关系获取到指定的2个下标index
+	for index, v := range nums {
+		map_index, bol := map1[v]
+		if bol && map_index != index {
+			res_nums = append(res_nums, map_index, index)
+			return res_nums
+		}
+	}
+	return res_nums
+}
 
-// }
-
-//合并区间
+//8,合并区间
 // 输入：intervals = [[1,4],[4,5]]
 // 输出：[[1,5]]
 // 解释：区间 [1,4] 和 [4,5] 可被视为重叠区间。
@@ -216,8 +236,10 @@ func main() {
 	// ints := []int{7, 2, 8, 5, 0, 9, 1, 2, 9, 5, 3, 6, 6, 7, 3, 2, 8, 4, 3, 7, 9, 5, 7, 7, 4, 7, 4, 9, 4, 7, 0, 1, 1, 1, 7, 4, 0, 0, 6}
 	// ints := []int{0, 0, 1, 1, 1, 2, 2, 3, 3, 4}
 	// int := deleteDuplicates(ints)
-	ints := [][]int{{1, 6}, {2, 4}, {3, 9}, {9, 12}}
-	re_ints := merge(ints)
+	// ints := [][]int{{1, 6}, {2, 4}, {3, 9}, {9, 12}}
+	ints := []int{3, 2, 4}
+
+	re_ints := twoSum(ints, 6)
 	fmt.Println(re_ints)
 
 }

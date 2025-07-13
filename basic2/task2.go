@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"math"
+	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -147,36 +150,36 @@ type Task func()
 // 然后创建 Rectangle 和 Circle 结构体，实现 Shape 接口。在主函数中，
 // 创建这两个结构体的实例，并调用它们的 Area() 和 Perimeter() 方法。
 
-// type Shape interface {
-// 	Area()
-// 	Perimeter()
-// }
-// type Rectangle struct {
-// 	long float32
-// 	wide float32
-// }
-// type Circle struct {
-// 	Radius float32
-// }
+type Shape interface {
+	Area()
+	Perimeter()
+}
+type Rectangle struct {
+	long float32
+	wide float32
+}
+type Circle struct {
+	Radius float32
+}
 
-// // 实现接口重写方法
-// // 长方形
-// func (r Rectangle) Area() float32 {
-// 	return r.long * r.wide
-// }
+// 实现接口重写方法
+// 长方形
+func (r Rectangle) Area() float32 {
+	return r.long * r.wide
+}
 
-// func (r Rectangle) Perimeter() float32 {
-// 	return 2 * (r.long + r.wide)
-// }
+func (r Rectangle) Perimeter() float32 {
+	return 2 * (r.long + r.wide)
+}
 
-// // 圆
-// func (r Circle) Area() float32 {
-// 	return math.Pi * (r.Radius * r.Radius)
-// }
+// 圆
+func (r Circle) Area() float32 {
+	return math.Pi * (r.Radius * r.Radius)
+}
 
-// func (r Circle) Perimeter() float32 {
-// 	return 2 * math.Pi * r.Radius
-// }
+func (r Circle) Perimeter() float32 {
+	return 2 * math.Pi * r.Radius
+}
 
 // func main() {
 // 	r := Rectangle{
@@ -211,24 +214,129 @@ func (e Employee) PrintInfo() {
 	fmt.Println("编号:", e.EmployeeID)
 }
 
+// func main() {
+// 	person1 := Employee{
+// 		Person: Person{
+// 			Name: "张三",
+// 			Age:  20,
+// 		},
+
+// 		EmployeeID: "001",
+// 	}
+// 	person2 := Employee{
+// 		Person: Person{
+// 			Name: "李四",
+// 			Age:  20,
+// 		},
+
+// 		EmployeeID: "001",
+// 	}
+// 	person1.PrintInfo()
+// 	person2.PrintInfo()
+
+// }
+
+// 4.1 编写一个程序，使用通道实现两个协程之间的通信。一个协程生成从1到10的整数，并将这些整数发送到通道中，
+// 另一个协程从通道中接收这些整数并打印出来。
+func sendInt(ch chan int) {
+	for i := 1; i <= 10; i++ {
+		ch <- i
+		// fmt.Printf("发送:%d\n ", i)
+	}
+	close(ch)
+
+}
+func receive(ch chan int, wg *sync.WaitGroup) {
+	//前面的任务结束后再开始接受
+	defer wg.Done()
+	for v := range ch {
+		fmt.Println("接受到：", v)
+	}
+}
+func channelCommunication() {
+	var wg sync.WaitGroup
+	ch := make(chan int)
+	wg.Add(1)
+	go sendInt(ch)
+	go receive(ch, &wg)
+	wg.Wait()
+	// time.Sleep(2 * time.Second)
+}
+
+// 4.2 实现一个带有缓冲的通道，生产者协程向通道中发送100个整数，消费者协程从通道中接收这些整数并打印。
+func sendIntBuf(ch chan int) {
+	for i := 1; i <= 100; i++ {
+		ch <- i
+		// fmt.Printf("发送:%d\n ", i)
+	}
+	close(ch)
+
+}
+func receiveBuf(ch chan int, wg *sync.WaitGroup) {
+	//前面的任务结束后再开始接受
+	defer wg.Done()
+	for v := range ch {
+		fmt.Println("接受到：", v)
+	}
+}
+func bufferChan() {
+	var wg sync.WaitGroup
+	ch := make(chan int, 10)
+	wg.Add(1)
+	go sendIntBuf(ch)
+	go receiveBuf(ch, &wg)
+	wg.Wait()
+	// time.Sleep(2 * time.Second)
+}
+
+// func main() {
+// 	// channelCommunication()
+// 	// bufferChan()
+// }
+
+// 5.1编写一个程序，使用 sync.Mutex 来保护一个共享的计数器。启动10个协程，
+// 每个协程对计数器进行1000次递增操作，最后输出计数器的值。
+func add_for_mutex() int {
+	var num int
+	var wg sync.WaitGroup
+	var mt sync.Mutex
+	for i := 1; i <= 10; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for j := 1; j <= 1000; j++ {
+				mt.Lock()
+				num++
+				mt.Unlock()
+			}
+		}()
+	}
+	wg.Wait()
+	return num
+}
+
+//5.2使用原子操作（ sync/atomic 包）实现一个无锁的计数器。启动10个协程，
+// 每个协程对计数器进行1000次递增操作，最后输出计数器的值。
+
+func add_for_atomic() int64 {
+	var num int64
+	var wg sync.WaitGroup
+	for i := 1; i <= 10; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for j := 1; j <= 1000; j++ {
+				atomic.AddInt64(&num, 1)
+			}
+		}()
+	}
+	wg.Wait()
+	return num
+
+}
 func main() {
-	person1 := Employee{
-		Person: Person{
-			Name: "张三",
-			Age:  20,
-		},
-
-		EmployeeID: "001",
-	}
-	person2 := Employee{
-		Person: Person{
-			Name: "李四",
-			Age:  20,
-		},
-
-		EmployeeID: "001",
-	}
-	person1.PrintInfo()
-	person2.PrintInfo()
-
+	// num := add_for_mutex()
+	// fmt.Println(num)
+	num := add_for_atomic()
+	fmt.Println(num)
 }
